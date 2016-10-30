@@ -14,7 +14,7 @@ private struct FileTags {
     static let Scenario = "Scenario:"
     static let Outline = "Scenario Outline:"
     static let Examples = "Examples:"
-    static let ExampleLineOrDataTable = "|"
+    static let ExampleOrDataTableLine = "|"
     static let Given = "Given"
     static let When = "When"
     static let Then = "Then"
@@ -111,14 +111,15 @@ extension NativeFeature {
                         state.exampleLines = []
                         state.parsingStep = false
 
-                    case FileTags.ExampleLineOrDataTable:
+                    case FileTags.ExampleOrDataTableLine:
                         if (state.parsingStep){
                             
+                            //lets get the latest step
                             guard var step = state.steps.last else {
                                 break;
                             }
 
-                            //we remove the latest step tuple first, because we modify it
+                            //we remove the latest step tuple first, because we are going to modify it
                             state.steps.removeLast()
                             
                             //first part of the data table requires initialization of the arry
@@ -127,7 +128,7 @@ extension NativeFeature {
                             }
                             
                             //split it up
-                            var partialDataTable = lineSuffix.components(separatedBy: FileTags.ExampleLineOrDataTable)
+                            var partialDataTable = lineSuffix.components(separatedBy: FileTags.ExampleOrDataTableLine)
                             //remove whitespaces and ending
                             partialDataTable = partialDataTable.map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) }).filter { !$0.isEmpty }
                             
@@ -178,7 +179,7 @@ extension String {
     }
     
     func lineComponents() -> (String, String)? {
-        let prefixes = [ FileTags.Scenario, FileTags.Background, FileTags.Given, FileTags.When, FileTags.Then, FileTags.And, FileTags.Outline, FileTags.Examples, FileTags.ExampleLineOrDataTable ]
+        let prefixes = [ FileTags.Scenario, FileTags.Background, FileTags.Given, FileTags.When, FileTags.Then, FileTags.And, FileTags.Outline, FileTags.Examples, FileTags.ExampleOrDataTableLine ]
         
         func first(_ a: [String]) -> (String, String)? {
             if a.count == 0 { return nil }

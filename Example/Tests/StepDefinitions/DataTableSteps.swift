@@ -2,7 +2,7 @@
 //  DataTableSteps.swift
 //  XCTest-Gherkin
 //
-//  Created by University on 10/29/16.
+//  Created by Simon on 10/29/16.
 //  Copyright © 2016 CocoaPods. All rights reserved.
 //
 
@@ -25,12 +25,10 @@ class SanityStepsDataTable : StepDefiner {
         // Examples of defining a step with no capture groups
         step("A list of numbers") { (dataTable: [[String]]) in
             XCTAssertTrue(dataTable.count > 0)
-            
-           self.dataTable = dataTable.map { Int($0[0])!}
+            self.dataTable = dataTable.map { Int($0[0])!}
         }
         
         step("I sum them"){
-            
             guard let dataTable = self.dataTable else {
                 XCTFail("No data table available to sum")
                 return
