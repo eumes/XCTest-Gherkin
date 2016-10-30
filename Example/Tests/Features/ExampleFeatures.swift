@@ -70,4 +70,17 @@ class ExampleFeatures: XCTestCase {
         And("Some value should be between 5 and 7")
     }
     
+    
+    
+    let exampleDataTable = [
+        ["1", "2"],
+        ["3", "4"]
+    ];
+    
+    func testDataTableVariant1() {
+        
+        
+        
+    }
+    
 }

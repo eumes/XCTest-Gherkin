@@ -14,7 +14,7 @@ private struct FileTags {
     static let Scenario = "Scenario:"
     static let Outline = "Scenario Outline:"
     static let Examples = "Examples:"
-    static let ExampleLine = "|"
+    static let ExampleLineOrDataTable = "|"
     static let Given = "Given"
     static let When = "When"
     static let Then = "Then"
@@ -100,7 +100,8 @@ extension NativeFeature {
                         saveBackgroundOrScenarioAndUpdateParseState(lineSuffix)
                         
                     case FileTags.Given, FileTags.When, FileTags.Then, FileTags.And:
-                        state.steps.append(lineSuffix)
+                        state.steps.append((lineSuffix, nil))
+                        state.parsingStep = true;
                         
                     case FileTags.Outline:
                         saveBackgroundOrScenarioAndUpdateParseState(lineSuffix)
@@ -108,12 +109,40 @@ extension NativeFeature {
                     case FileTags.Examples:
                         // Prep the examples array for examples
                         state.exampleLines = []
+                        state.parsingStep = false
 
-                    case FileTags.ExampleLine:
-                        state.exampleLines.append( (lineIndex+1, lineSuffix) )
-                        
+                    case FileTags.ExampleLineOrDataTable:
+                        if (state.parsingStep){
+                            
+                            guard var step = state.steps.last else {
+                                break;
+                            }
+
+                            //we remove the latest step tuple first, because we modify it
+                            state.steps.removeLast()
+                            
+                            //first part of the data table requires initialization of the arry
+                            if (step.dataTable == nil){
+                                step.dataTable = []
+                            }
+                            
+                            //split it up
+                            var partialDataTable = lineSuffix.components(separatedBy: FileTags.ExampleLineOrDataTable)
+                            //remove whitespaces and ending
+                            partialDataTable = partialDataTable.map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) }).filter { !$0.isEmpty }
+                            
+                            //add to current data table lines
+                            step.dataTable?.append(partialDataTable)
+                            
+                            //and finally we add it again to the overall steps
+                            state.steps.append(step)
+                        }
+                        else {
+                            state.exampleLines.append( (lineIndex+1, lineSuffix) )
+                        }
+                    
                     case FileTags.Feature:
-                        break
+                        state.parsingStep = false
                         
                     default:
                         // Just ignore lines we don't recognise yet
@@ -149,7 +178,7 @@ extension String {
     }
     
     func lineComponents() -> (String, String)? {
-        let prefixes = [ FileTags.Scenario, FileTags.Background, FileTags.Given, FileTags.When, FileTags.Then, FileTags.And, FileTags.Outline, FileTags.Examples, FileTags.ExampleLine ]
+        let prefixes = [ FileTags.Scenario, FileTags.Background, FileTags.Given, FileTags.When, FileTags.Then, FileTags.And, FileTags.Outline, FileTags.Examples, FileTags.ExampleLineOrDataTable ]
         
         func first(_ a: [String]) -> (String, String)? {
             if a.count == 0 { return nil }

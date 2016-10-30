@@ -10,7 +10,7 @@ import Foundation
 
 class NativeScenario : CustomStringConvertible {
     let scenarioDescription: String
-    let stepDescriptions: [String]
+    let stepDescriptions: [(expression: String, dataTable:[[String]]?)]
 
     /**
      If the scenario description is 'Test funny things are funny' then the result of calling
@@ -24,7 +24,7 @@ class NativeScenario : CustomStringConvertible {
         get { return strdup(self.selectorString) }
     }
     
-    required init(_ description: String, steps: [String]) {
+    required init(_ description: String, steps: [(String, [[String]]?)]) {
         self.scenarioDescription = description
         self.stepDescriptions = steps
     }

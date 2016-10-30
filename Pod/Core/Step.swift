@@ -14,7 +14,8 @@ import Foundation
 */
 class Step : Hashable, Equatable, CustomDebugStringConvertible {
     let expression:String
-    let function:([String])->()
+    let function:([String], [[String]]?)->()
+    var dataTable:[[String]]?
     
     fileprivate let file: String
     fileprivate let line: Int
@@ -29,11 +30,12 @@ class Step : Hashable, Equatable, CustomDebugStringConvertible {
      The `file` and `line` parameters are for debugging; they should show where the step was
      initially defined.
      */
-    init(_ expression: String, file: String, line: Int, _ function: @escaping ([String])->() ) {
+    init(_ expression: String, file: String, line: Int, _ function: @escaping ([String], [[String]]?)->()) {
         self.expression = expression
         self.function = function
         self.file = file
         self.line = line
+        self.dataTable = nil
         
         // Just throw here; the test will fail :)
         self.regex = try! NSRegularExpression(pattern: expression, options: NSRegularExpression.Options.caseInsensitive)

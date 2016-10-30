@@ -12,9 +12,10 @@ private let whitespace = CharacterSet.whitespaces
 
 class ParseState {
     var description: String?
-    var steps: [String]
+    var steps: [ (expression: String, dataTable:[[String]]?) ]
     var exampleLines: [ (lineNumber:Int, line:String) ]
     var parsingBackground: Bool
+    var parsingStep: Bool
 
     convenience init() {
         self.init(description: nil)
@@ -24,6 +25,7 @@ class ParseState {
         self.description = description
         steps = []
         exampleLines = []
+        parsingStep = false
         self.parsingBackground = parsingBackground
     }
     
@@ -80,7 +82,8 @@ class ParseState {
                     var step = originalStep
                     
                     example.pairs.forEach { (title, value) in
-                        step = step.replacingOccurrences(of: "<\(title)>", with: value)
+                        var expression = step.expression.replacingOccurrences(of: "<\(title)>", with: value)
+                        step = (expression, step.dataTable)
                     }
                     
                     return step

@@ -54,8 +54,8 @@ class GherkinState {
     }
     
     // TODO: This needs to be refactored since function has a side effect (appends to missingStepsImplementations)
-    func matchingGherkinStepExpressionFound(_ expression: String) -> Bool {
-        let matches = self.gherkinStepsMatchingExpression(expression)
+    func matchingGherkinStepExpressionFound(_ expression: (expression: String, dataTable:[[String]]?)) -> Bool {
+        let matches = self.gherkinStepsMatchingExpression(expression.expression)
         switch matches.count {
             
         case 0:
@@ -141,22 +141,22 @@ public extension XCTestCase {
     /**
      Run the step matching the specified expression
      */
-    func Given(_ expression: String) { self.performStep(expression) }
+    func Given(_ expression: String, _ dataTable: [[String]]? = nil) { self.performStep(expression, dataTable) }
     
     /**
      Run the step matching the specified expression
      */
-    func When(_ expression: String) { self.performStep(expression) }
+    func When(_ expression: String, _ dataTable: [[String]]? = nil) { self.performStep(expression, dataTable) }
     
     /**
      Run the step matching the specified expression
      */
-    func Then(_ expression: String) { self.performStep(expression) }
+    func Then(_ expression: String, _ dataTable: [[String]]? = nil) { self.performStep(expression, dataTable) }
     
     /**
      Run the step matching the specified expression
      */
-    func And(_ expression: String) { self.performStep(expression) }
+    func And(_ expression: String, _ dataTable: [[String]]? = nil) { self.performStep(expression, dataTable) }
     
     /**
      Supply a set of example data to the test. This must be done before calling `Outline`.
@@ -240,7 +240,7 @@ extension XCTestCase {
     /**
      Adds a step to the global store of steps, but only if this expression isn't already defined with a step
     */
-    func addStep(_ expression: String, file: String, line: Int, _ function: @escaping ([String])->()) {
+    func addStep(_ expression: String, file: String, line: Int, _ function: @escaping ([String], [[String]]?)->()) {
         let step = Step(expression, file: file, line: line, function)
         state.steps.insert(step);
     }
@@ -248,7 +248,7 @@ extension XCTestCase {
     /**
      Finds and performs a step test based on expression
      */
-    func performStep(_ initialExpression: String) {
+    func performStep(_ initialExpression: String, _ dataTable: [[String]]?) {
         // Get a mutable copy - if we are in an outline we might be changing this
         var expression = initialExpression
         
@@ -266,7 +266,7 @@ extension XCTestCase {
         
         // Get the step and the matches inside it
         guard let (step, match) = self.state.gherkinStepsAndMatchesMatchingExpression(expression).first else {
-            if !self.state.matchingGherkinStepExpressionFound(expression) && self.state.shouldPrintTemplateCodeForAllMissingSteps() {
+            if !self.state.matchingGherkinStepExpressionFound((expression, dataTable)) && self.state.shouldPrintTemplateCodeForAllMissingSteps() {
                 self.state.printStepDefinitions()
                 self.state.printTemplatedCodeForAllMissingSteps()
                 self.state.resetMissingSteps()
@@ -299,7 +299,7 @@ extension XCTestCase {
         
         // Run the step
         state.currentStepDepth += 1
-        step.function(matchStrings)
+        step.function(matchStrings, dataTable)
         state.currentStepDepth -= 1
     }
     
