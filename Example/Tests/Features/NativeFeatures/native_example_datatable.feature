@@ -7,3 +7,10 @@ Feature: Simple Feature File Parsing
             | 4711 |
         When I sum them
         Then I should get 4770
+
+    Scenario: The correct translation for given latin name
+        Given a set of translations
+            | Latin           | English      |
+            | Cucumis sativus | Cucumber     |
+            | Cucumis anguria | Burr Gherkin |
+        Then latin name Cucumis sativus should be translated to english name Cucumber

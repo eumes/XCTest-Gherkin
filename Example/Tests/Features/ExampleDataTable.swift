@@ -27,4 +27,15 @@ class ExampleDataTable: XCTestCase {
         When("I sum them")
         Then("I should get 4770");
     }
+    
+    let exampleData2 = [
+        ["Latin",           "English"],
+        ["Cucumis sativus", "Cucumber"],
+        ["Cucumis anguria", "Burr Gherkin"]
+    ]
+    
+    func testDataTableVariant2() {
+        Given("A set of translations", exampleData2)
+        Then("Latin name Cucumis sativus should be translated to english name Cucumber")
+    }
 }

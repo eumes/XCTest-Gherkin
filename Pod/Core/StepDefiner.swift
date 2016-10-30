@@ -76,6 +76,23 @@ open class StepDefiner {
     }
 
     
+    open func step(_ expression: String, file: String = #file, line: Int = #line, f0dd: @escaping ([[String: String]])->()) {
+        self.test.addStep(expression, file: file, line: line) { (ignoredMatches:[String], requiredDataTable:[[String]]?) in
+            guard let dataTable = requiredDataTable else {
+                XCTFail("Step did not provide a data table but step defintition expected one")
+                return
+            }
+            
+            guard let dataTableDictionary = self.dataTableDictionaryFromArray(dataTable) else {
+                XCTFail("Step expected data table dictionary but given data could not be converted")
+                return
+            }
+            
+            f0dd(dataTableDictionary)
+        }
+    }
+
+    
     // MARK: One or more matching groups
     /**
      Create a new step with an expression that contains one or more matching groups.
@@ -122,6 +139,22 @@ open class StepDefiner {
             }
             
             f1d(matches, dataTable)
+        }
+    }
+    
+    open func step(_ expression: String, file: String = #file, line: Int = #line, f1dd: @escaping ([String], [[String: String]])->()) {
+        self.test.addStep(expression, file: file, line: line) { (matches:[String], requiredDataTable:[[String]]?) in
+            guard let dataTable = requiredDataTable else {
+                XCTFail("Step did not provide a data table but step defintition expected one")
+                return
+            }
+            
+            guard let dataTableDictionary = self.dataTableDictionaryFromArray(dataTable) else {
+                XCTFail("Step expected data table dictionary but given data could not be converted")
+                return
+            }
+            
+            f1dd(matches, dataTableDictionary)
         }
     }
     
@@ -180,6 +213,27 @@ open class StepDefiner {
             }
             
             f1sd(match, dataTable)
+        }
+    }
+    
+    open func step(_ expression: String, file: String = #file, line: Int = #line, f1sdd: @escaping (String, [[String: String]])->()) {
+        self.test.addStep(expression, file: file, line: line) { (matches: [String], requiredDataTable: [[String]]?) in
+            guard let match = matches.first else {
+                XCTFail("Expected single match not found in \"\(expression)\"")
+                return
+            }
+            
+            guard let dataTable = requiredDataTable else {
+                XCTFail("Step did not provide a data table but step defintition expected one")
+                return
+            }
+            
+            guard let dataTableDictionary = self.dataTableDictionaryFromArray(dataTable) else {
+                XCTFail("Step expected data table dictionary but given data could not be converted")
+                return
+            }
+            
+            f1sdd(match, dataTableDictionary)
         }
     }
     
@@ -251,6 +305,32 @@ open class StepDefiner {
         }
     }
     
+    open func step(_ expression: String, file: String = #file, line: Int = #line, f1idd: @escaping (Int, [[String: String]])->()) {
+        self.test.addStep(expression, file: file, line: line) { (matches: [String], requiredDataTable: [[String]]?) in
+            guard let match = matches.first else {
+                XCTFail("Expected single match not found in \"\(expression)\"")
+                return
+            }
+            
+            guard let integer = Int(match) else {
+                XCTFail("Could not convert \"\(match)\" to an integer")
+                return
+            }
+            
+            guard let dataTable = requiredDataTable else {
+                XCTFail("Step did not provide a data table but step defintition expected one")
+                return
+            }
+            
+            guard let dataTableDictionary = self.dataTableDictionaryFromArray(dataTable) else {
+                XCTFail("Step expected data table dictionary but given data could not be converted")
+                return
+            }
+            
+            f1idd(integer, dataTableDictionary)
+        }
+    }
+    
     // MARK: Two matching groups (string)
     /**
      If you only want to match the first two parameters, this will help make your code nicer
@@ -307,6 +387,28 @@ open class StepDefiner {
             }
             
             f2sd(matches[0], matches[1], dataTable)
+        }
+    }
+    
+    open func step(_ expression: String, file: String = #file, line: Int = #line, f2sdd: @escaping (String, String, [[String: String]])->()) {
+        self.test.addStep(expression, file: file, line: line) { (matches: [String], requiredDataTable: [[String]]?) in
+            
+            guard matches.count >= 2 else {
+                XCTFail("Expected at least 2 matches, found \(matches.count) instead, from \"\(expression)\"")
+                return
+            }
+            
+            guard let dataTable = requiredDataTable else {
+                XCTFail("Step did not provide a data table but step defintition expected one")
+                return
+            }
+            
+            guard let dataTableDictionary = self.dataTableDictionaryFromArray(dataTable) else {
+                XCTFail("Step expected data table dictionary but given data could not be converted")
+                return
+            }
+            
+            f2sdd(matches[0], matches[1], dataTableDictionary)
         }
     }
     
@@ -382,6 +484,34 @@ open class StepDefiner {
         }
     }
     
+    open func step(_ expression: String, file: String = #file, line: Int = #line, f2idd: @escaping (Int, Int, [[String: String]]?)->()) {
+        self.test.addStep(expression, file: file, line: line) { (matches: [String], requiredDataTable: [[String]]?) in
+            
+            guard matches.count >= 2 else {
+                XCTFail("Expected at least 2 matches, found \(matches.count) instead, from \"\(expression)\"")
+                return
+            }
+            
+            guard let i1 = Int(matches[0]),
+                let i2 = Int(matches[1]) else {
+                    XCTFail("Could not convert matches (\(matches[0]) and \(matches[1])) to integers, from \"\(expression)\"")
+                    return
+            }
+            
+            guard let dataTable = requiredDataTable else {
+                XCTFail("Step did not provide a data table but step defintition expected one")
+                return
+            }
+            
+            guard let dataTableDictionary = self.dataTableDictionaryFromArray(dataTable) else {
+                XCTFail("Step expected data table dictionary but given data could not be converted")
+                return
+            }
+            
+            f2idd(i1, i2, dataTableDictionary)
+        }
+    }
+    
     // MARK: Internal step calling
     /**
      Run other steps from inside your overridden defineSteps() method.
@@ -409,5 +539,25 @@ open class StepDefiner {
      */
     open func step(_ expression: String, dataTable: [[String]]) {
         self.test.performStep(expression, dataTable)
+    }
+    
+    
+    func dataTableDictionaryFromArray(_ dataTable: [[String]]) -> [[String: String]]?{
+        if (dataTable.count < 2){
+            return nil;
+        }
+        
+        var mappings: [[String: String]] = []
+        var dataTableArray = dataTable;
+        let names = dataTableArray.removeFirst()
+        for line in dataTableArray {
+            var mapping: [String: String] = [:]
+            for (index, element) in line.enumerated() {
+                mapping.updateValue(element, forKey: names[index])
+            }
+            mappings.append(mapping)
+        }
+        
+        return mappings
     }
 }
